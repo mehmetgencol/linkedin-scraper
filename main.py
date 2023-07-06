@@ -1,5 +1,8 @@
+from __future__ import print_function
+
+import datetime
 import logging
-import os
+import os.path
 
 import pandas as pd
 from dotenv import dotenv_values
@@ -22,6 +25,8 @@ LINK = "Link"
 
 OUTPUT_KEYS = [COMPANY_NAME, TITLE_HEADER, JOB_ID, POSTED_AT, LINK]
 
+DATETIME_FORMAT = "%Y-%m-%d"
+
 search_configs = dotenv_values('search.env')
 
 df = pd.read_csv(search_configs["COMPANY_DETAIL_FILE"], delimiter=';', header=None)
@@ -37,6 +42,10 @@ if os.path.isfile(output_file) and os.path.getsize(output_file) > 0:
 else:
     # Create an empty DataFrame if the file does not exist or is empty
     stored_jobs = pd.DataFrame(columns=OUTPUT_KEYS)
+
+earliest_date = datetime.datetime.now() - datetime.timedelta(days=30)
+stored_jobs[POSTED_AT] = pd.to_datetime(stored_jobs[POSTED_AT], format=DATETIME_FORMAT)
+stored_jobs = stored_jobs[stored_jobs[POSTED_AT] >= earliest_date]
 
 search_results = []
 
