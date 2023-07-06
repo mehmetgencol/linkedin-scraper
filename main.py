@@ -25,7 +25,7 @@ LINK = "Link"
 
 OUTPUT_KEYS = [COMPANY_NAME, TITLE_HEADER, JOB_ID, POSTED_AT, LINK]
 
-DATETIME_FORMAT = "%Y-%m-%d"
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 search_configs = dotenv_values('search.env')
 
@@ -56,7 +56,7 @@ def on_data(data: EventData):
         COMPANY_NAME: [data.company],
         TITLE_HEADER: [data.title],
         JOB_ID: [int(data.job_id)],
-        POSTED_AT: [data.date],
+        POSTED_AT: [datetime.datetime.strptime(data.date, DATETIME_FORMAT)],
         LINK: [data.link],
     })
     search_results.append(new_data)
