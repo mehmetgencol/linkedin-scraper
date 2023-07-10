@@ -34,6 +34,7 @@ df = df.dropna()
 
 keywords = search_configs["RELATED_KEYWORDS"].split(",")
 output_file = search_configs["OUTPUT_FILE"]
+time_filters = TimeFilters[search_configs["SEARCH_PERIOD"]]
 
 # Check if the input file exists and is not empty
 if os.path.isfile(output_file) and os.path.getsize(output_file) > 0:
@@ -105,7 +106,7 @@ for index, row in df.iterrows():
                     company_jobs_url=search_url,
                     # Filter by companies.
                     relevance=RelevanceFilters.RECENT,
-                    time=TimeFilters.DAY,
+                    time=time_filters,
                     type=[TypeFilters.FULL_TIME, TypeFilters.CONTRACT, TypeFilters.TEMPORARY]
                 )
             )
