@@ -25,7 +25,7 @@ LINK = "Link"
 
 OUTPUT_KEYS = [COMPANY_NAME, TITLE_HEADER, JOB_ID, POSTED_AT, LINK]
 
-DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+DATE_FORMAT = "%Y-%m-%d"
 
 search_configs = dotenv_values('search.env')
 
@@ -44,7 +44,7 @@ else:
     stored_jobs = pd.DataFrame(columns=OUTPUT_KEYS)
 
 earliest_date = datetime.datetime.now() - datetime.timedelta(days=30)
-stored_jobs[POSTED_AT] = pd.to_datetime(stored_jobs[POSTED_AT], format=DATETIME_FORMAT)
+stored_jobs[POSTED_AT] = pd.to_datetime(stored_jobs[POSTED_AT], format=DATE_FORMAT)
 stored_jobs = stored_jobs[stored_jobs[POSTED_AT] >= earliest_date]
 
 search_results = []
@@ -56,7 +56,7 @@ def on_data(data: EventData):
         COMPANY_NAME: [data.company],
         TITLE_HEADER: [data.title],
         JOB_ID: [int(data.job_id)],
-        POSTED_AT: [datetime.datetime.strptime(data.date, DATETIME_FORMAT)],
+        POSTED_AT: [datetime.datetime.strptime(data.date, DATE_FORMAT)],
         LINK: [data.link],
     })
     search_results.append(new_data)
