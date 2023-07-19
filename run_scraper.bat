@@ -5,4 +5,4 @@ if not exist ".\venv" (
 
 call "venv\Scripts\activate.bat"
 
-python -m main.py
+python -m job_scraper
