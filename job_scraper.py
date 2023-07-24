@@ -11,6 +11,8 @@ from linkedin_jobs_scraper.events import Events, EventData
 from linkedin_jobs_scraper.filters import RelevanceFilters, TimeFilters, TypeFilters
 from linkedin_jobs_scraper.query import Query, QueryOptions, QueryFilters
 
+from snowflake_connector import SnowflakeConnector
+
 # Change root logger level (default is WARN)
 logging.basicConfig(level=logging.INFO)
 
@@ -33,12 +35,22 @@ class JobScraper:
 
     def __init__(self):
         self.search_configs = dotenv_values('search.env')
+        self.snowflake_connector = None
         self.scraper = self.get_scraper()
         self.company_df = None
         self.keywords = []
         self.output_file = ""
         self.time_filters = None
         self.stored_jobs = []
+
+    def get_snowflake_connector(self):
+        if not self.snowflake_connector:
+            user = self.search_configs["SNOWFLAKE_USER"]
+            password = self.search_configs["SNOWFLAKE_PASSWORD"]
+            account = self.search_configs["SNOWFLAKE_ACCOUNT"]
+            tag = self.search_configs["SNOWFLAKE_TAG"]
+            self.snowflake_connector = SnowflakeConnector(user, password, account, tag)
+        return self.snowflake_connector
 
     def set_local_search(self):
         self.company_df = pd.read_csv(self.search_configs["COMPANY_DETAIL_FILE"], delimiter=';', header=None)
@@ -137,7 +149,7 @@ class JobScraper:
         self.scraper.run(company_queries)
         df_results = pd.DataFrame(search_results)
         df_results = df_results.drop_duplicates(subset=[JOB_ID])
-        return df_results.to_dict(orient='records')
+        self.get_snowflake_connector().write_pandas(df_results)
 
 
 if __name__ == '__main__':
