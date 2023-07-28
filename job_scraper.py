@@ -48,8 +48,11 @@ class JobScraper:
             user = self.search_configs["SNOWFLAKE_USER"]
             password = self.search_configs["SNOWFLAKE_PASSWORD"]
             account = self.search_configs["SNOWFLAKE_ACCOUNT"]
-            tag = self.search_configs["SNOWFLAKE_TAG"]
-            self.snowflake_connector = SnowflakeConnector(user, password, account, tag)
+            db = self.search_configs["SNOWFLAKE_DB"]
+            schema = self.search_configs["SNOWFLAKE_SCHEMA"]
+            table = self.search_configs["SNOWFLAKE_TABLE"]
+            warehouse = self.search_configs["SNOWFLAKE_WAREHOUSE"]
+            self.snowflake_connector = SnowflakeConnector(user, password, account, db, schema, table, warehouse)
         return self.snowflake_connector
 
     def set_local_search(self):
@@ -150,6 +153,13 @@ class JobScraper:
         df_results = pd.DataFrame(search_results)
         df_results = df_results.drop_duplicates(subset=[JOB_ID])
         self.get_snowflake_connector().write_pandas(df_results)
+
+    def test(self):
+        data = {COMPANY_NAME: "AutoNotion", TITLE_HEADER: "Software Engineer", JOB_ID: "12345",
+                POSTED_AT: datetime.datetime.now(), LINK: "https://www.google.com"}
+
+        df = pd.DataFrame(data, index=[0])
+        self.get_snowflake_connector().write_pandas(df)
 
 
 if __name__ == '__main__':

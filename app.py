@@ -62,9 +62,7 @@ async def search_endpoint():
     if search_period not in PERIODS:
         return jsonify({'error': f'Invalid search period value. Possible values: {list(PERIODS)}'}), 400
 
-    results = job_scraper.run_search(COMPANY_ENUM[company], TimeFilters[search_period], keywords.split(","))
-
-    return jsonify(results), 200
+    job_scraper.run_search(COMPANY_ENUM[company], TimeFilters[search_period], keywords.split(","))
 
 
 if __name__ == '__main__':
