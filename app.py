@@ -1,7 +1,8 @@
 import csv
 import re
+from multiprocessing import Process
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from linkedin_jobs_scraper.filters import TimeFilters
 
 from job_scraper import JobScraper
@@ -26,7 +27,17 @@ def read_company_enum(file_path):
     return company_enum
 
 
+def run_search(company_ids, period, keywords):
+    job_scraper.run_search(company_ids, period, keywords)
+
+
 COMPANY_ENUM = read_company_enum('Accounts-InSearch.csv')
+
+
+@app.route('/companies', methods=['GET'])
+def companies_endpoint():
+    company_values = list(COMPANY_ENUM.keys())
+    return jsonify(company_values)
 
 
 @app.route('/help', methods=['GET'])
@@ -62,7 +73,18 @@ async def search_endpoint():
     if search_period not in PERIODS:
         return jsonify({'error': f'Invalid search period value. Possible values: {list(PERIODS)}'}), 400
 
-    job_scraper.run_search(COMPANY_ENUM[company], TimeFilters[search_period], keywords.split(","))
+    company_ids_combined = COMPANY_ENUM[company]
+    period = TimeFilters[search_period]
+    split_keywords = keywords.split(",")
+
+    search_process = Process(
+        target=run_search,
+        args=(company_ids_combined.split(","), period, split_keywords,),
+        daemon=True
+    )
+    search_process.start()
+
+    return Response(mimetype='application/json', status=200)
 
 
 if __name__ == '__main__':

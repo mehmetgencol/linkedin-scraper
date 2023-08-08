@@ -112,7 +112,7 @@ class JobScraper:
             COMPANY_NAME: [data.company],
             TITLE_HEADER: [data.title],
             JOB_ID: [int(data.job_id)],
-            POSTED_AT: [datetime.datetime.strptime(data.date, DATE_FORMAT)],
+            POSTED_AT: data.date,
             LINK: [data.link],
         })
         search_results.append(new_data)
@@ -150,16 +150,10 @@ class JobScraper:
         self.scraper.on(Events.ERROR, JobScraper.on_error)
 
         self.scraper.run(company_queries)
-        df_results = pd.DataFrame(search_results)
-        df_results = df_results.drop_duplicates(subset=[JOB_ID])
-        self.get_snowflake_connector().write_pandas(df_results)
-
-    def test(self):
-        data = {COMPANY_NAME: "AutoNotion", TITLE_HEADER: "Software Engineer", JOB_ID: "12345",
-                POSTED_AT: datetime.datetime.now(), LINK: "https://www.google.com"}
-
-        df = pd.DataFrame(data, index=[0])
-        self.get_snowflake_connector().write_pandas(df)
+        if len(search_results) > 0:
+            df_results = pd.concat(search_results, ignore_index=True)
+            df_results = df_results.drop_duplicates(subset=[JOB_ID])
+            self.get_snowflake_connector().write_pandas(df_results)
 
 
 if __name__ == '__main__':
