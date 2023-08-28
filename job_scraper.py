@@ -11,23 +11,11 @@ from linkedin_jobs_scraper.events import Events, EventData
 from linkedin_jobs_scraper.filters import RelevanceFilters, TimeFilters, TypeFilters
 from linkedin_jobs_scraper.query import Query, QueryOptions, QueryFilters
 
+from globals import *
 from snowflake_connector import SnowflakeConnector
 
 # Change root logger level (default is WARN)
 logging.basicConfig(level=logging.INFO)
-
-BASE_URL = "https://www.linkedin.com/jobs/search/?f_C="
-AND_CHAR = "%2C"
-
-COMPANY_NAME = "CompanyName"
-TITLE_HEADER = "Title"
-JOB_ID = "JobId"
-POSTED_AT = "PostedAt"
-LINK = "Link"
-
-OUTPUT_KEYS = [COMPANY_NAME, TITLE_HEADER, JOB_ID, POSTED_AT, LINK]
-
-DATE_FORMAT = "%Y-%m-%d"
 
 
 class JobScraper:
@@ -154,6 +142,9 @@ class JobScraper:
             df_results = pd.concat(search_results, ignore_index=True)
             df_results = df_results.drop_duplicates(subset=[JOB_ID])
             self.get_snowflake_connector().write_pandas(df_results)
+
+    def cleanup_outdated(self):
+        self.get_snowflake_connector().clear_depends_on(2)
 
 
 if __name__ == '__main__':

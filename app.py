@@ -31,6 +31,10 @@ def run_search(company_ids, period, keywords):
     job_scraper.run_search(company_ids, period, keywords)
 
 
+def cleanup_jobs():
+    job_scraper.cleanup_outdated()
+
+
 COMPANY_ENUM = read_company_enum('Accounts-InSearch.csv')
 
 
@@ -52,6 +56,18 @@ Example: software engineer, product manager
 - Available search period values: {period_values}
 
 '''
+
+
+@app.route('/cleanup', methods=['PATCH'])
+def cleanup_endpoint():
+    cleanup_process = Process(
+        target=cleanup_jobs,
+        args=(),
+        daemon=True
+    )
+    cleanup_process.start()
+
+    return Response(mimetype='application/json', status=200)
 
 
 @app.route('/search', methods=['POST'])
