@@ -144,7 +144,7 @@ class JobScraper:
             self.get_snowflake_connector().write_pandas(df_results)
 
     def cleanup_outdated(self):
-        self.get_snowflake_connector().clear_depends_on(2)
+        self.get_snowflake_connector().clear_depends_on()
 
 
 if __name__ == '__main__':
