@@ -1,12 +1,12 @@
 FROM public.ecr.aws/lambda/python:3.11
 
-RUN yum update
+RUN yum update -y
 RUN yum install -y gnupg2 wget curl --nogpgcheck
 
 #RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 #RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
 
-RUN yum update
+RUN yum update -y
 COPY ../docker_files/google-chrome-stable-114.0.5735.198-1.x86_64.rpm /tmp/chrome.rpm
 RUN yum install -y /tmp/chrome.rpm --nogpgcheck && rm /tmp/chrome.rpm
 

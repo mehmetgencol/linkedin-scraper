@@ -1,0 +1,16 @@
+-- Build images locally
+docker build -t selenium_env_base:<version> -f ./docker_files/Dockerfile_selenium .
+docker build -t scraper_libraries:<version> -f ./docker_files/Dockerfile_libraries .
+docker build -t job_scraper:<version> -f docker_files/Dockerfile .
+
+-- Run a container from an image
+docker run --name job_scraper -dp 127.0.0.1:5000:5000 job_scraper:<version>
+
+-- Tag containers to push to AWS
+docker tag selenium_env_base:<version> <AWS-ID>.dkr.ecr.<aws-region>.amazonaws.com/open_jobs_scraper_selenium_env:<version>
+docker tag scraper_libraries:<version> <AWS-ID>.dkr.ecr.<aws-region>.amazonaws.com/open_jobs_scraper_libraries:<version>
+docker tag job_scraper:<version> <AWS-ID>.dkr.ecr.<aws-region>.amazonaws.com/open-jobs-scraper:<version>
+
+-- Send Image to ECR
+aws ecr get-login-password --region <aws-region> | docker login --username AWS --password-stdin <AWS-ID>.dkr.ecr.<aws-region>.amazonaws.com
+docker push <AWS-ID>.dkr.ecr.<aws-region>.amazonaws.com/open-jobs-scraper:<version>
