@@ -14,7 +14,7 @@ def handler(event: dict, _):
     method = event.get('method', None)
 
     if method == SEARCH:
-        data = event.get('data', [])
+        data = event.get('data', {})
         return function_handler.search(data)
 
     if method == CLEANUP:
