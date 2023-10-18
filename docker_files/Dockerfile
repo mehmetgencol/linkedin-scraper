@@ -1,5 +1,8 @@
 FROM scraper_libraries:1.1
 
+RUN mkdir -p /bin
+COPY ../driver/chromedriver /bin/chromedriver
+
 COPY ../search.env search.env
 COPY ../Accounts-InSearch.csv Accounts-InSearch.csv
 COPY ../function_handler.py function_handler.py
