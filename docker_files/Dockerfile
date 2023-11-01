@@ -1,7 +1,8 @@
-FROM scraper_libraries:1.0
+FROM scraper_libraries:1.1
 
 RUN mkdir -p /bin
 COPY ../driver/chromedriver /bin/chromedriver
+RUN chmod +x /bin/chromedriver
 
 COPY ../search.env search.env
 COPY ../Accounts-InSearch.csv Accounts-InSearch.csv
