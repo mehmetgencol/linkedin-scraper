@@ -66,8 +66,13 @@ class JobScraper:
     def get_scraper(self):
 
         chrome_options = get_default_driver_options()
-        chrome_options.add_argument('--disable-infobars')
-        chrome_options.add_argument('--remote-debugging-port=9222')
+        chrome_options.add_argument("--disable-infobars")
+        chrome_options.add_argument("--remote-debugging-port=9222")
+        chrome_options.add_argument("--hide-scrollbars")
+        chrome_options.add_argument("--enable-logging")
+        chrome_options.add_argument("--log-level=0")
+        chrome_options.add_argument("--v=99")
+        chrome_options.add_argument("--single-process")
 
         return LinkedinScraper(
             chrome_executable_path=self.search_configs["CHROME_EXE"],
