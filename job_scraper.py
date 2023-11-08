@@ -10,6 +10,7 @@ from linkedin_jobs_scraper import LinkedinScraper
 from linkedin_jobs_scraper.events import Events, EventData
 from linkedin_jobs_scraper.filters import RelevanceFilters, TimeFilters, TypeFilters
 from linkedin_jobs_scraper.query import Query, QueryOptions, QueryFilters
+from linkedin_jobs_scraper.utils.chrome_driver import get_default_driver_options
 
 from globals import *
 from snowflake_connector import SnowflakeConnector
@@ -63,10 +64,20 @@ class JobScraper:
         self.stored_jobs = self.stored_jobs[self.stored_jobs[POSTED_AT] >= earliest_date]
 
     def get_scraper(self):
+
+        chrome_options = get_default_driver_options()
+        chrome_options.add_argument("--disable-infobars")
+        chrome_options.add_argument("--remote-debugging-port=9222")
+        chrome_options.add_argument("--hide-scrollbars")
+        chrome_options.add_argument("--enable-logging")
+        chrome_options.add_argument("--log-level=0")
+        chrome_options.add_argument("--v=99")
+        chrome_options.add_argument("--single-process")
+
         return LinkedinScraper(
             chrome_executable_path=self.search_configs["CHROME_EXE"],
             # Custom Chrome executable path (e.g. /foo/bar/bin/chromedriver)
-            chrome_options=None,  # Custom Chrome options here
+            chrome_options=chrome_options,  # Custom Chrome options here
             headless=True,  # Overrides headless mode only if chrome_options is None
             max_workers=1,
             # How many threads will be spawned to run queries concurrently (one Chrome driver for each thread)
