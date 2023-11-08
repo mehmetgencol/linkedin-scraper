@@ -1,4 +1,4 @@
-FROM scraper_libraries:1.2
+FROM scraper_libraries:1.0
 
 RUN mkdir -p /bin
 COPY ../driver/chromedriver /bin/chromedriver
