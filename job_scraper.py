@@ -76,7 +76,10 @@ class JobScraper:
         chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument("--disable-software-rasterizer")
         # chrome_options.add_argument("--headless=new")
-        # chrome_options.add_argument('--user-data-dir=/tmp/ChromeProfile')
+        chrome_options.add_argument('--disable-dev-tools')
+        chrome_options.add_argument('--user-data-dir=/tmp/chrome-user-data')
+        chrome_options.add_argument("--no-zygote")
+        # chrome_options.binary_location = "/opt/chrome/chrome"
 
 
         return LinkedinScraper(
