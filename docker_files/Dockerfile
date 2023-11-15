@@ -9,10 +9,12 @@ COPY ../Accounts-InSearch.csv Accounts-InSearch.csv
 COPY ../function_handler.py function_handler.py
 COPY ../globals.py globals.py
 COPY ../job_scraper.py job_scraper.py
-COPY ../lambda_function.py lambda_function.py
 COPY ../snowflake_connector.py snowflake_connector.py
 
-ENTRYPOINT [ "/var/lang/bin/python", "-m", "awslambdaric" ]
+# Handler
+COPY ../lambda_function.py lambda_function.py
+
+#ENTRYPOINT [ "/var/lang/bin/python", "-m", "awslambdaric" ]
 
 # Use for EC2 deployment
 CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0" ]
