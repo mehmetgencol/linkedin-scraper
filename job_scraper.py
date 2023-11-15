@@ -3,6 +3,7 @@ from __future__ import print_function
 import datetime
 import logging
 import os.path
+import time
 
 import pandas as pd
 from dotenv import dotenv_values
@@ -79,8 +80,7 @@ class JobScraper:
         chrome_options.add_argument('--disable-dev-tools')
         chrome_options.add_argument('--user-data-dir=/tmp/chrome-user-data')
         chrome_options.add_argument("--no-zygote")
-        # chrome_options.binary_location = "/opt/chrome/chrome"
-
+        # chrome_options.binary_location = "/opt/bin/chromium"
 
         return LinkedinScraper(
             chrome_executable_path=self.search_configs["CHROME_EXE"],
@@ -157,6 +157,7 @@ class JobScraper:
         self.scraper.on(Events.ERROR, JobScraper.on_error)
 
         self.scraper.run(company_queries)
+        time.sleep(2)
         if len(search_results) > 0:
             df_results = pd.concat(search_results, ignore_index=True)
             df_results = df_results.drop_duplicates(subset=[JOB_ID])
