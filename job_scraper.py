@@ -73,6 +73,10 @@ class JobScraper:
         chrome_options.add_argument("--log-level=0")
         chrome_options.add_argument("--v=99")
         chrome_options.add_argument("--single-process")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument('--disable-dev-tools')
+        chrome_options.add_argument('--user-data-dir=/tmp/chrome-user-data')
+        chrome_options.add_argument("--no-zygote")
 
         return LinkedinScraper(
             chrome_executable_path=self.search_configs["CHROME_EXE"],
