@@ -2,7 +2,7 @@ FROM scraper_libraries:1.0
 
 RUN mkdir -p /bin
 COPY ../driver/chromedriver /bin/chromedriver
-RUN chmod +x /bin/chromedriver
+RUN chmod 0775 /bin/chromedriver
 
 COPY ../search.env search.env
 COPY ../Accounts-InSearch.csv Accounts-InSearch.csv
@@ -18,4 +18,7 @@ ENTRYPOINT [ "/var/lang/bin/python", "-m", "awslambdaric" ]
 CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0" ]
 # Use for Lambda deployment
 #CMD [ "lambda_function.handler" ]
+#use for local run
+#ENTRYPOINT [ "/var/lang/bin/python"]
+#CMD [ "lambda_function.py" ]
 
