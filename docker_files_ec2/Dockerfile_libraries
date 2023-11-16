@@ -1,0 +1,5 @@
+FROM selenium_env_base_ec2:1.0
+
+COPY ../requirements.txt requirements.txt
+
+RUN pip install -r requirements.txt

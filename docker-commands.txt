@@ -1,20 +1,30 @@
--- Build images locally
+-- Build images locally for Lambda
 docker build -t selenium_env_base:1.0 -f ./docker_files/Dockerfile_selenium .
 docker build -t scraper_libraries:1.0 -f ./docker_files/Dockerfile_libraries .
 docker build -t job_scraper:1.0 -f docker_files/Dockerfile .
 
+-- Build images locally for Lambda
+docker build -t selenium_env_base_ec2:1.0 -f ./docker_files_ec2/Dockerfile_selenium .
+docker build -t scraper_libraries_ec2:1.0 -f ./docker_files_ec2/Dockerfile_libraries .
+docker build -t job_scraper_ec2:1.0 -f docker_files_ec2/Dockerfile .
+
+
 -- Run a container from an image
-docker run --name job_scraper -dp 127.0.0.1:5000:5000 job_scraper:1.0
+docker run --name job_scraper_ec2 -dp 127.0.0.1:5000:5000 job_scraper_ec2:1.0
 
 -- Tag containers to push to AWS
-docker tag selenium_env_base:<version> <AWS-ID>.dkr.ecr.us-east-1.amazonaws.com/open_jobs_scraper_selenium_env:<version>
-docker tag scraper_libraries:<version> <AWS-ID>.dkr.ecr.us-east-1.amazonaws.com/open_jobs_scraper_libraries:<version>
-docker tag job_scraper:1.0 <AWS-ID>.dkr.ecr.us-east-1.amazonaws.com/open-jobs-scraper:<version>
+docker tag selenium_env_base_ec2:1.0 018079024734.dkr.ecr.us-east-1.amazonaws.com/open_jobs_scraper_selenium_env_ec2:1.0
+docker tag scraper_libraries_ec2:1.0 018079024734.dkr.ecr.us-east-1.amazonaws.com/open_jobs_scraper_libraries_ec2:1.0
+docker tag job_scraper_ec2:1.0 018079024734.dkr.ecr.us-east-1.amazonaws.com/open-jobs-scraper_ec2:1.0
 
 -- Send Image to ECR
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <AWS-ID>.dkr.ecr.us-east-1.amazonaws.com
-docker push <AWS-ID>.dkr.ecr.us-east-1.amazonaws.com/open-jobs-scraper:<version>
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 018079024734.dkr.ecr.us-east-1.amazonaws.com
+docker push 018079024734.dkr.ecr.us-east-1.amazonaws.com/open-jobs-scraper:2.0
 
+--PS: You can update container names too
+--PS2: Please download chrome stable. (into folder /driver)
+-- google-chrome-stable-114.0.5735.198-1.x86_64.rpm -> for lambda
+-- google-chrome-stable_114.0.5735.198-1_amd64.deb -> for EC2
 -- Connect to EC2
 ssh -i JobScraperKey.pem ec2-user@<public_ip>
 

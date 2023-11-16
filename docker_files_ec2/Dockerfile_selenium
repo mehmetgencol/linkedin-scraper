@@ -1,0 +1,18 @@
+FROM python:3.11.6
+
+RUN apt update -y
+RUN apt install -y gnupg2 wget curl
+
+# Install google chrome
+RUN apt update -y
+COPY ../driver/google-chrome-stable_114.0.5735.198-1_amd64.deb /tmp/chrome.deb
+RUN apt install /tmp/chrome.deb -y
+RUN rm /tmp/chrome.deb
+
+# Add chrome driver
+RUN apt update -y
+COPY ../driver/chromedriver /usr/local/bin/chromedriver
+
+# Set display port as an environment variable
+ENV DISPLAY=:99
+
