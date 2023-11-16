@@ -1,12 +1,10 @@
 FROM public.ecr.aws/lambda/python:3.11
 
 # Install google chrome
-RUN yum update -y
 COPY ../driver/google-chrome-stable-114.0.5735.198-1.x86_64.rpm /tmp/chrome.rpm
 RUN yum install -y /tmp/chrome.rpm --nogpgcheck && rm /tmp/chrome.rpm
 
 # Add chrome driver
-RUN yum update -y
 COPY ../driver/chromedriver /usr/local/bin/chromedriver
 
 # Set display port as an environment variable
