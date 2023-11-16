@@ -14,3 +14,10 @@ docker tag job_scraper:1.0 <AWS-ID>.dkr.ecr.us-east-1.amazonaws.com/open-jobs-sc
 -- Send Image to ECR
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <AWS-ID>.dkr.ecr.us-east-1.amazonaws.com
 docker push <AWS-ID>.dkr.ecr.us-east-1.amazonaws.com/open-jobs-scraper:<version>
+
+-- Connect to EC2
+ssh -i JobScraperKey.pem ec2-user@<public_ip>
+
+-- Get Image from Repo
+docker pull <AWS-ID>.dkr.ecr.us-east-1.amazonaws.com/open-jobs-scraper:<version>
+
