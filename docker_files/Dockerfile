@@ -21,3 +21,6 @@ CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0" ]
 # Use for Lambda deployment
 #CMD [ "lambda_function.handler" ]
 
+#ENTRYPOINT [ "/var/lang/bin/python"]
+#CMD [ "lambda_function.py" ]
+
