@@ -3,7 +3,7 @@ docker build -t selenium_env_base:1.0 -f ./docker_files/Dockerfile_selenium .
 docker build -t scraper_libraries:1.0 -f ./docker_files/Dockerfile_libraries .
 docker build -t job_scraper:1.0 -f docker_files/Dockerfile .
 
--- Build images locally for Lambda
+-- Build images locally for EC2
 docker build -t selenium_env_base_ec2:1.0 -f ./docker_files_ec2/Dockerfile_selenium .
 docker build -t scraper_libraries_ec2:1.0 -f ./docker_files_ec2/Dockerfile_libraries .
 docker build -t job_scraper_ec2:1.0 -f docker_files_ec2/Dockerfile .
@@ -25,6 +25,8 @@ docker push 018079024734.dkr.ecr.us-east-1.amazonaws.com/open-jobs-scraper:2.0
 --PS2: Please download chrome stable. (into folder /driver)
 -- google-chrome-stable-114.0.5735.198-1.x86_64.rpm -> for lambda
 -- google-chrome-stable_114.0.5735.198-1_amd64.deb -> for EC2
+
+
 -- Connect to EC2
 ssh -i JobScraperKey.pem ec2-user@<public_ip>
 
