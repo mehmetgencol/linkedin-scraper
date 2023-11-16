@@ -10,7 +10,6 @@ RUN apt install /tmp/chrome.deb -y
 RUN rm /tmp/chrome.deb
 
 # Add chrome driver
-RUN apt update -y
 COPY ../driver/chromedriver /usr/local/bin/chromedriver
 
 # Set display port as an environment variable
