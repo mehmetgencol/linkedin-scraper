@@ -31,8 +31,7 @@ class SnowflakeConnector:
         return self._conn
 
     def write_pandas(self, df):
-        if self._conn:
-            pandas_tools.write_pandas(self.get_conn(), df, self.table, auto_create_table=True)
+        pandas_tools.write_pandas(self.get_conn(), df, self.table, auto_create_table=True)
 
     def clear_depends_on(self, older_than=30):
         earliest_date = datetime.datetime.now() - datetime.timedelta(days=older_than)

@@ -24,6 +24,6 @@ docker push 018079024734.dkr.ecr.us-east-1.amazonaws.com/open-jobs-scraper:2.0
 --PS: You can update container names too
 --PS2: Please download chrome stable. (into folder /driver)
 -- google-chrome-stable-114.0.5735.198-1.x86_64.rpm -> for lambda
--- https://rpm.pkgs.org/packages/google-chrome-x86_64/google-chrome-stable-114.0.5735.198-1.x86_64.rpm.html
+-- https://dl.google.com/linux/chrome/rpm/stable/x86_64/google-chrome-stable-114.0.5735.198-1.x86_64.rpm
 -- google-chrome-stable_114.0.5735.198-1_amd64.deb -> for EC2
--- http://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.198-1_amd64.deb
+-- https://dl.google.com/linux/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.198-1_amd64.deb

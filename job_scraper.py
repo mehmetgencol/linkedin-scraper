@@ -147,16 +147,18 @@ class JobScraper:
         self.stored_jobs.to_csv(self.output_file, index=False)
 
     def run_search(self, companies, time_period, keywords):
-        company_queries = JobScraper.prepare_query(companies, time_period, keywords)
-        search_results = []
-        self.scraper.on(Events.DATA, lambda x: JobScraper.on_data(x, search_results))
-        self.scraper.on(Events.ERROR, JobScraper.on_error)
+        for company in companies:
+            company_queries = JobScraper.prepare_query(list(company), time_period, keywords)
+            search_results = []
+            self.scraper.on(Events.DATA, lambda x: JobScraper.on_data(x, search_results))
+            self.scraper.on(Events.ERROR, JobScraper.on_error)
 
-        self.scraper.run(company_queries)
-        if len(search_results) > 0:
-            df_results = pd.concat(search_results, ignore_index=True)
-            df_results = df_results.drop_duplicates(subset=[JOB_ID])
-            self.get_snowflake_connector().write_pandas(df_results)
+            self.scraper.run(company_queries)
+
+            if len(search_results) > 0:
+                df_results = pd.concat(search_results, ignore_index=True)
+                df_results = df_results.drop_duplicates(subset=[JOB_ID])
+                self.get_snowflake_connector().write_pandas(df_results)
 
     def cleanup_outdated(self):
         self.get_snowflake_connector().clear_depends_on()
