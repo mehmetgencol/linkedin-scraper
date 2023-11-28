@@ -46,7 +46,9 @@ def searchJobsForToday():
 
 
 sched = BackgroundScheduler(daemon=True)
-sched.add_job(searchJobsForToday,'interval',minutes=60, next_run_time=datetime.now())
+
+# run the job every day
+sched.add_job(searchJobsForToday,'interval',minutes=1440, next_run_time=datetime.now())
 sched.start()
 
 
