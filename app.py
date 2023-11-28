@@ -1,9 +1,13 @@
 import csv
+import logging
 import re
+from datetime import datetime
 from multiprocessing import Process
 
+from dotenv import dotenv_values
 from flask import Flask, jsonify, request, Response
 from linkedin_jobs_scraper.filters import TimeFilters
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from job_scraper import JobScraper
 
@@ -15,7 +19,6 @@ keywords_pattern = r"[a-zA-Z, ]+$"
 PERIODS = TimeFilters.__members__.keys()
 job_scraper = JobScraper()
 
-
 # Read the company enum values from a CSV file
 def read_company_enum(file_path):
     company_enum = {}
@@ -26,6 +29,26 @@ def read_company_enum(file_path):
                 company_enum[row[0]] = row[1]
     return company_enum
 
+COMPANY_ENUM = read_company_enum('Accounts-InSearch.csv')
+
+def searchJobsForToday():
+    search_configs = dotenv_values('search.env')
+    keywords = search_configs["RELATED_KEYWORDS"].split(",")
+    search_period = TimeFilters[search_configs["SEARCH_PERIOD"]]
+    company_ids_combined = list(COMPANY_ENUM.keys())
+
+    search_process = Process(
+        target=run_search,
+        args=(company_ids_combined, search_period, keywords),
+        daemon=True
+    )
+    search_process.start()
+
+
+sched = BackgroundScheduler(daemon=True)
+sched.add_job(searchJobsForToday,'interval',minutes=60, next_run_time=datetime.now())
+sched.start()
+
 
 def run_search(company_ids, period, keywords):
     job_scraper.run_search(company_ids, period, keywords)
@@ -33,9 +56,6 @@ def run_search(company_ids, period, keywords):
 
 def cleanup_jobs():
     job_scraper.cleanup_outdated()
-
-
-COMPANY_ENUM = read_company_enum('Accounts-InSearch.csv')
 
 
 @app.route('/companies', methods=['GET'])
