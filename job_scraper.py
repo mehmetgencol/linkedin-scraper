@@ -39,7 +39,7 @@ class JobScraper:
             account = self.search_configs["SNOWFLAKE_ACCOUNT"]
             db = self.search_configs["SNOWFLAKE_DB"]
             schema = self.search_configs["SNOWFLAKE_SCHEMA"]
-            table = self.search_configs["SNOWFLAKE_TABLE"]
+            table = self.search_configs["JOBS_TABLE"]
             warehouse = self.search_configs["SNOWFLAKE_WAREHOUSE"]
             self.snowflake_connector = SnowflakeConnector(user, password, account, db, schema, table, warehouse)
         return self.snowflake_connector
@@ -66,17 +66,17 @@ class JobScraper:
     def get_scraper(self):
 
         chrome_options = get_default_driver_options()
-        chrome_options.add_argument("--disable-infobars")
-        chrome_options.add_argument("--remote-debugging-port=9222")
-        chrome_options.add_argument("--hide-scrollbars")
-        chrome_options.add_argument("--enable-logging")
-        chrome_options.add_argument("--log-level=0")
-        chrome_options.add_argument("--v=99")
-        chrome_options.add_argument("--single-process")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument('--disable-dev-tools')
-        chrome_options.add_argument('--user-data-dir=/tmp/chrome-user-data')
-        chrome_options.add_argument("--no-zygote")
+        # chrome_options.add_argument("--disable-infobars")
+        # chrome_options.add_argument("--remote-debugging-port=9222")
+        # chrome_options.add_argument("--hide-scrollbars")
+        # chrome_options.add_argument("--enable-logging")
+        # chrome_options.add_argument("--log-level=0")
+        # chrome_options.add_argument("--v=99")
+        # chrome_options.add_argument("--single-process")
+        # chrome_options.add_argument("--no-sandbox")
+        # chrome_options.add_argument('--disable-dev-tools')
+        # chrome_options.add_argument('--user-data-dir=/tmp/chrome-user-data')
+        # chrome_options.add_argument("--no-zygote")
 
         return LinkedinScraper(
             chrome_executable_path=self.search_configs["CHROME_EXE"],
@@ -85,41 +85,40 @@ class JobScraper:
             headless=True,  # Overrides headless mode only if chrome_options is None
             max_workers=1,
             # How many threads will be spawned to run queries concurrently (one Chrome driver for each thread)
-            slow_mo=5  # Slow down the scraper to avoid 'Too many requests 429' errors (in seconds)
+            slow_mo=1  # Slow down the scraper to avoid 'Too many requests 429' errors (in seconds)
         )
 
     @staticmethod
-    def prepare_query(company_ids, search_period, keywords):
-        search_url = BASE_URL + AND_CHAR.join(company_ids)
-        company_queries = [
-            Query(
-                query=keyword.strip(),
-                options=QueryOptions(
-                    locations=['United States'],
-                    filters=QueryFilters(
-                        company_jobs_url=search_url,
-                        # Filter by companies.
-                        relevance=RelevanceFilters.RECENT,
-                        time=search_period,
-                        type=[TypeFilters.FULL_TIME, TypeFilters.CONTRACT, TypeFilters.TEMPORARY]
-                    )
+    def prepare_query(company_id, search_period, keyword):
+        search_url = BASE_URL + company_id
+        company_query = Query(
+            query=keyword.strip(),
+            options=QueryOptions(
+                locations=['United States'],
+                filters=QueryFilters(
+                    company_jobs_url=search_url,
+                    # Filter by companies.
+                    relevance=RelevanceFilters.RECENT,
+                    time=search_period,
+                    type=[TypeFilters.FULL_TIME, TypeFilters.CONTRACT, TypeFilters.TEMPORARY]
                 )
             )
-            for keyword in keywords
-        ]
-        return company_queries
+        )
+        return company_query
 
     @staticmethod
-    def on_data(data: EventData, search_results=[]):
+    def on_data(data: EventData, company_id, keyword, search_results=[]):
         new_data = pd.DataFrame({
             COMPANY_NAME: [data.company],
             TITLE_HEADER: [data.title],
             JOB_ID: [int(data.job_id)],
             POSTED_AT: data.date,
             LINK: [data.link],
+            COMPANY_ID: company_id,
+            KEYWORD: keyword
         })
         search_results.append(new_data)
-        print('[ON_DATA]', data.title, data.company, data.company_link, data.date, data.link, data.insights,
+        print('[ON_DATA]', data.title, data.company, company_id, keyword, data.company_link, data.date, data.link, data.insights,
               len(data.description))
 
     @staticmethod
@@ -127,37 +126,53 @@ class JobScraper:
         print('[ON_ERROR]', error)
 
     def run_local_search(self):
-        queries = []
+        pass
+        # queries = []
+        #
+        # for index, row in self.company_df.iterrows():
+        #     companies = [value.strip() for value in str(row[1]).split(',') if value.strip()]
+        #     company_queries = JobScraper.prepare_query(companies, self.time_filters, self.keywords)
+        #     queries.extend(company_queries)
+        #
+        # search_results = []
+        # self.scraper.on(Events.DATA, lambda x: JobScraper.on_data(x, search_results))
+        # self.scraper.on(Events.ERROR, JobScraper.on_error)
+        # self.scraper.run(queries)
+        #
+        # if search_results:
+        #     self.stored_jobs = pd.concat([self.stored_jobs, pd.concat(search_results)])
+        #
+        # self.stored_jobs = self.stored_jobs.drop_duplicates(subset=[JOB_ID])
+        # self.stored_jobs = self.stored_jobs.sort_values(by=[COMPANY_NAME, POSTED_AT])
+        # self.stored_jobs.to_csv(self.output_file, index=False)
 
-        for index, row in self.company_df.iterrows():
-            companies = [value.strip() for value in str(row[1]).split(',') if value.strip()]
-            company_queries = JobScraper.prepare_query(companies, self.time_filters, self.keywords)
-            queries.extend(company_queries)
+    def run_search(self, company_df, time_period, keywords):
+        company_list = self.get_snowflake_connector().get_all_pandas(self.search_configs["COMPANIES_TABLE"])
+        keywords = self.get_snowflake_connector().get_all_pandas(self.search_configs["KEYWORDS_TABLE"])
 
-        search_results = []
-        self.scraper.on(Events.DATA, lambda x: JobScraper.on_data(x, search_results))
-        self.scraper.on(Events.ERROR, JobScraper.on_error)
-        self.scraper.run(queries)
+        keyword_list = []
+        for index, keyword in enumerate(keywords):
+            keyword_list.append(keyword[0])
 
-        if search_results:
-            self.stored_jobs = pd.concat([self.stored_jobs, pd.concat(search_results)])
+        for index, company in enumerate(company_list):
+            for keyword in keyword_list:
+                try:
+                    logging.info("Company: {company_name}".format(company_name=str(company[0])))
+                    company_id = str(company[1])
+                    logging.info("Company ID: {company_id}".format(company_id=company_id))
+                    company_queries = JobScraper.prepare_query(company_id, time_period, keyword)
+                    search_results = []
+                    self.scraper.on(Events.DATA, lambda x: JobScraper.on_data(x, company_id, keyword, search_results))
+                    self.scraper.on(Events.ERROR, JobScraper.on_error)
 
-        self.stored_jobs = self.stored_jobs.drop_duplicates(subset=[JOB_ID])
-        self.stored_jobs = self.stored_jobs.sort_values(by=[COMPANY_NAME, POSTED_AT])
-        self.stored_jobs.to_csv(self.output_file, index=False)
+                    self.scraper.run(company_queries)
 
-    def run_search(self, companies, time_period, keywords):
-        company_queries = JobScraper.prepare_query(companies, time_period, keywords)
-        search_results = []
-        self.scraper.on(Events.DATA, lambda x: JobScraper.on_data(x, search_results))
-        self.scraper.on(Events.ERROR, JobScraper.on_error)
-
-        self.scraper.run(company_queries)
-
-        if len(search_results) > 0:
-            df_results = pd.concat(search_results, ignore_index=True)
-            df_results = df_results.drop_duplicates(subset=[JOB_ID])
-            self.get_snowflake_connector().write_pandas(df_results)
+                    if len(search_results) > 0:
+                        df_results = pd.concat(search_results, ignore_index=True)
+                        df_results = df_results.drop_duplicates(subset=[JOB_ID])
+                        self.get_snowflake_connector().write_pandas(df_results)
+                except Exception as error:
+                    logging.error(error)
 
     def cleanup_outdated(self):
         self.get_snowflake_connector().clear_depends_on()

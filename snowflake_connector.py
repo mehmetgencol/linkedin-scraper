@@ -33,6 +33,20 @@ class SnowflakeConnector:
     def write_pandas(self, df):
         pandas_tools.write_pandas(self.get_conn(), df, self.table, auto_create_table=True)
 
+    def get_all_pandas(self, table_name):
+        cursor = self.get_conn().cursor()
+        query = ('select * from '+table_name)
+        cursor.execute(query)
+        result_set = cursor.fetchall()
+        return result_set
+
+        # for result in resultset:
+        #     cursor.execute(result[0])
+        #     df = cursor.fetch_pandas_all()
+        #
+        #     df.to_csv(r'C:\Users\...<your filename here>' + result[1], index=False)
+
+
     def clear_depends_on(self, older_than=30):
         earliest_date = datetime.datetime.now() - datetime.timedelta(days=older_than)
         date_parsed = earliest_date.strftime(DATE_FORMAT)
