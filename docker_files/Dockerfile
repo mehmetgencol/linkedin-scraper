@@ -17,9 +17,9 @@ COPY ../lambda_function.py lambda_function.py
 #ENTRYPOINT [ "/var/lang/bin/python", "-m", "awslambdaric" ]
 
 # Use for EC2 deployment
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0" ]
+#CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0" ]
 # Use for Lambda deployment
-#CMD [ "lambda_function.handler" ]
+CMD [ "lambda_function.handler" ]
 
 #ENTRYPOINT [ "/var/lang/bin/python"]
 #CMD [ "lambda_function.py" ]

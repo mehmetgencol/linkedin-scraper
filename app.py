@@ -11,6 +11,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from job_scraper import JobScraper
 
+import pandas as pd
+
 app = Flask(__name__)
 
 keywords_pattern = r"[a-zA-Z, ]+$"
@@ -35,11 +37,12 @@ def searchJobsForToday():
     search_configs = dotenv_values('search.env')
     keywords = search_configs["RELATED_KEYWORDS"].split(",")
     search_period = TimeFilters[search_configs["SEARCH_PERIOD"]]
-    company_ids_combined = list(COMPANY_ENUM.keys())
+    company_df = pd.read_csv(search_configs["COMPANY_DETAIL_FILE"], delimiter=';', header=None)
+    company_df = company_df.dropna()
 
     search_process = Process(
         target=run_search,
-        args=(company_ids_combined, search_period, keywords),
+        args=(company_df, search_period, keywords),
         daemon=True
     )
     search_process.start()
@@ -52,8 +55,8 @@ sched.add_job(searchJobsForToday,'interval',minutes=1440, next_run_time=datetime
 sched.start()
 
 
-def run_search(company_ids, period, keywords):
-    job_scraper.run_search(company_ids, period, keywords)
+def run_search(company_df, period, keywords):
+    job_scraper.run_search(company_df, period, keywords)
 
 
 def cleanup_jobs():

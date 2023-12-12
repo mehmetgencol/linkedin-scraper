@@ -6,6 +6,8 @@ TITLE_HEADER = "Title"
 JOB_ID = "JobId"
 POSTED_AT = "PostedAt"
 LINK = "Link"
+COMPANY_ID = "CompanyId"
+KEYWORD = "Keyword"
 
 OUTPUT_KEYS = [COMPANY_NAME, TITLE_HEADER, JOB_ID, POSTED_AT, LINK]
 
